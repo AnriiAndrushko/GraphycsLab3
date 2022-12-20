@@ -4,7 +4,7 @@
     {
         private float step, sizeX, sizeY, startX, startY, scale;
 
-        public PlaneGenerator(Func<(float, float), float> funk, float step = 0.02f, float sizeX = 3, float sizeY = 1, float startX = 0, float startY = 0, float scale = 30)
+        public PlaneGenerator(Func<(float, float), float> funk, float step = 0.1f, float sizeX = 10, float sizeY = 10, float startX = 0, float startY = 0, float scale = 2)
         {
             Funk = funk;
             this.step = step;

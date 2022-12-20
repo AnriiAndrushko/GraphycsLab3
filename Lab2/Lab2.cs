@@ -104,7 +104,7 @@ namespace Lab2
         {
             base.OnLoad();
 
-            PlaneGenerator taskFunk = new PlaneGenerator(((float x, float y) input) => (float)(Math.Sqrt(input.x) + Math.Sqrt(input.y)));
+            PlaneGenerator taskFunk = new PlaneGenerator(((float x, float y) input) => (float)(Math.Sin(input.x) + Math.Cos(input.y)));
             _funkPlaneVertexes = taskFunk.Vertex;
             _funkPlaneIndexes = taskFunk.Indexes;
 
