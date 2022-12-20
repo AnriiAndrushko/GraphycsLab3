@@ -59,7 +59,8 @@ namespace Lab2
             0,2,3,
         };
 
-        float[] _funkPlaneVertexes;
+        private float[] _funkPlaneVertexes;
+        private uint[] _funkPlaneIndexes;
 
         private bool _isPerspective = true;
 
@@ -76,6 +77,7 @@ namespace Lab2
 
         private int _vertexBufferObjectFunk;
         private int _vertexArrayObjectFunk;
+        private int _elementBufferObjectFunk;
 
         private Shader _cubeShader;
 
@@ -103,13 +105,46 @@ namespace Lab2
             base.OnLoad();
 
             PlaneGenerator taskFunk = new PlaneGenerator(((float x, float y) input) => (float)(Math.Sqrt(input.x) + Math.Sqrt(input.y)));
-            _funkPlaneVertexes = taskFunk.Quad;
+            _funkPlaneVertexes = taskFunk.Vertex;
+            _funkPlaneIndexes = taskFunk.Indexes;
 
             _torus = Shapes.GetTorusQuadsVert(30,30);
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
+
+            //torus
+            _vertexArrayObjectTorus = GL.GenVertexArray();
+            GL.BindVertexArray(_vertexArrayObjectTorus);
+
+            _vertexBufferObjectTorus = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectTorus);
+            GL.BufferData(BufferTarget.ArrayBuffer, _torus.Length * sizeof(float), _torus, BufferUsageHint.StaticDraw);
+
+            _simpleColorShader = new Shader("Shaders/SimpleColor.vert", "Shaders/SimpleColor.frag");
+            _simpleColorShader.Use();
+            var vertexLocationTorus = _simpleColorShader.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(vertexLocationTorus);
+            GL.VertexAttribPointer(vertexLocationTorus, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            //plane
+            _vertexArrayObjectPlane = GL.GenVertexArray();
+            GL.BindVertexArray(_vertexArrayObjectPlane);
+
+            _vertexBufferObjectPlane = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectPlane);
+            GL.BufferData(BufferTarget.ArrayBuffer, _planeVertexes.Length * sizeof(float), _planeVertexes, BufferUsageHint.StaticDraw);
+
+            _elementBufferObjectPlane = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObjectPlane);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _planeIndexes.Length * sizeof(uint), _planeIndexes, BufferUsageHint.StaticDraw);
+
+
+            var vertexLocationPlane = _simpleColorShader.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(vertexLocationPlane);
+            GL.VertexAttribPointer(vertexLocationPlane, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
             //cube
             _vertexArrayCube = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArrayCube);
@@ -137,40 +172,6 @@ namespace Lab2
 
             _cubeShader.SetInt("texture0", 0);
 
-            //torus
-            _vertexArrayObjectTorus = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObjectTorus);
-
-            _vertexBufferObjectTorus = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectTorus);
-            GL.BufferData(BufferTarget.ArrayBuffer, _torus.Length * sizeof(float), _torus, BufferUsageHint.StaticDraw);
-
-            _elementBufferObjectPlane = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObjectCube);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _cubeIndexes.Length * sizeof(uint), _cubeIndexes, BufferUsageHint.StaticDraw);
-
-            _simpleColorShader = new Shader("Shaders/SimpleColor.vert", "Shaders/SimpleColor.frag");
-            _simpleColorShader.Use();
-            var vertexLocationTorus = _simpleColorShader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocationTorus);
-            GL.VertexAttribPointer(vertexLocationTorus, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-
-            //plane
-            _vertexArrayObjectPlane = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObjectPlane);
-
-            _vertexBufferObjectPlane = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectPlane);
-            GL.BufferData(BufferTarget.ArrayBuffer, _planeVertexes.Length * sizeof(float), _planeVertexes, BufferUsageHint.StaticDraw);
-
-            _elementBufferObjectPlane = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObjectPlane);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _planeIndexes.Length * sizeof(uint), _planeIndexes, BufferUsageHint.StaticDraw);
-
-
-            var vertexLocationPlane = _simpleColorShader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocationPlane);
-            GL.VertexAttribPointer(vertexLocationPlane, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
             //funk
             _vertexArrayObjectFunk = GL.GenVertexArray();
@@ -179,6 +180,10 @@ namespace Lab2
             _vertexBufferObjectFunk = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectFunk);
             GL.BufferData(BufferTarget.ArrayBuffer, _funkPlaneVertexes.Length * sizeof(float), _funkPlaneVertexes, BufferUsageHint.StaticDraw);
+
+            _elementBufferObjectFunk = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObjectFunk);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _funkPlaneIndexes.Length * sizeof(uint), _funkPlaneIndexes, BufferUsageHint.StaticDraw);
 
             var vertexLocationFunk = _simpleColorShader.GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocationFunk);
@@ -208,6 +213,7 @@ namespace Lab2
             _cubeShader.SetMatrix4("view", _camera.GetViewMatrix());
             _cubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix(_isPerspective));
 
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.DrawElements(PrimitiveType.Triangles, _cubeIndexes.Length, DrawElementsType.UnsignedInt, 0);
 
             //torus
@@ -223,6 +229,7 @@ namespace Lab2
             _simpleColorShader.SetMatrix4("view", _camera.GetViewMatrix());
             _simpleColorShader.SetMatrix4("projection", _camera.GetProjectionMatrix(_isPerspective));
 
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.DrawArrays(PrimitiveType.LineLoop, 0, _torus.Length/3);
 
 
@@ -239,11 +246,12 @@ namespace Lab2
             _simpleColorShader.SetMatrix4("view", _camera.GetViewMatrix());
             _simpleColorShader.SetMatrix4("projection", _camera.GetProjectionMatrix(_isPerspective));
 
-            GL.DrawElements(PrimitiveType.Triangles, _cubeIndexes.Length, DrawElementsType.UnsignedInt, 0);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.DrawElements(PrimitiveType.Triangles, _planeIndexes.Length, DrawElementsType.UnsignedInt, 0);
 
 
 
-            //torus
+            //funk
             GL.BindVertexArray(_vertexArrayObjectFunk);
             var funkModel = new Matrix4(
                 new Vector4(0.1f, 0, 0, 0),
@@ -256,7 +264,10 @@ namespace Lab2
             _simpleColorShader.SetMatrix4("view", _camera.GetViewMatrix());
             _simpleColorShader.SetMatrix4("projection", _camera.GetProjectionMatrix(_isPerspective));
 
-            GL.DrawArrays(PrimitiveType.Points, 0, _funkPlaneVertexes.Length / 3);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+
+            GL.DrawElements(PrimitiveType.TriangleStrip, _funkPlaneIndexes.Length, DrawElementsType.UnsignedInt, 0);
+            //GL.DrawArrays(PrimitiveType.Triangles, 0, _funkPlaneVertexes.Length / 3);
 
 
             SwapBuffers();
