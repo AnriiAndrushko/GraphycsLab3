@@ -2,9 +2,9 @@
 {
     internal class PlaneGenerator
     {
-        private float step, sizeX, sizeY, startX, startY;
+        private float step, sizeX, sizeY, startX, startY, scale;
 
-        public PlaneGenerator(Func<(float, float), float> funk, float step = 0.5f, float sizeX = 20, float sizeY = 20, float startX = 0, float startY = 0)
+        public PlaneGenerator(Func<(float, float), float> funk, float step = 0.02f, float sizeX = 3, float sizeY = 1, float startX = 0, float startY = 0, float scale = 30)
         {
             Funk = funk;
             this.step = step;
@@ -12,6 +12,7 @@
             this.sizeY = sizeY;
             this.startX = startX;
             this.startY = startY;
+            this.scale = scale;
         }
         public Func<(float, float), float> Funk;
 
@@ -46,13 +47,18 @@
         private float[] ReGenerateQuad()
         {
             var result = new List<float>();
+
+            int roundingDigits = (int)(step).ToString().Length-1;
+
             for (float x = startX; x < sizeX; x += step)
             {
+                x = (float)Math.Round(x, roundingDigits);
                 for (float y = startY; y < sizeY; y += step)
                 {
-                    result.Add(x);
-                    result.Add(y);
-                    result.Add(Funk((x,y)));
+                    y = (float)Math.Round(y, roundingDigits);
+                    result.Add(x*scale);
+                    result.Add(y*scale);
+                    result.Add(Funk((x,y))*scale);
                 }
             }
             return result.ToArray();
@@ -60,8 +66,8 @@
 
         private uint[] ReGenerateIdexes()
         {
-            int x = (int)(Math.Abs(sizeX - startX) / step);
-            int y = (int)(Math.Abs(sizeY - startY) / step);
+            int x = (int)Math.Round(Math.Abs(sizeX - startX) / step);
+            int y = (int)Math.Round(Math.Abs(sizeY - startY) / step);
 
             int maxX = x;
             int maxY = y;
@@ -73,7 +79,7 @@
 
             for (int i = 0; i < maxX-1; i++)
             {
-                for (int j = 0; j < maxY+maxX-1; j++)
+                for (int j = 0; j < maxY+maxY-1; j++)
                 {
                     result.Add((uint)index);
                     jump = !jump;

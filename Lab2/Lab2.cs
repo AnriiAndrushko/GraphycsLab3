@@ -264,7 +264,7 @@ namespace Lab2
             _simpleColorShader.SetMatrix4("view", _camera.GetViewMatrix());
             _simpleColorShader.SetMatrix4("projection", _camera.GetProjectionMatrix(_isPerspective));
 
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             GL.DrawElements(PrimitiveType.TriangleStrip, _funkPlaneIndexes.Length, DrawElementsType.UnsignedInt, 0);
             //GL.DrawArrays(PrimitiveType.Triangles, 0, _funkPlaneVertexes.Length / 3);
