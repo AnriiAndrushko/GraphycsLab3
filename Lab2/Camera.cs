@@ -68,13 +68,9 @@ namespace MyUtils
             return Matrix4.LookAt(Position, Position + _front, _up);
         }
 
-        public Matrix4 GetProjectionMatrix(bool isPerspective)
+        public Matrix4 GetProjectionMatrix()
         {
-            if (isPerspective)
-            {
-                return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
-            }
-            return Matrix4.CreateOrthographic(AspectRatio, AspectRatio, 0.01f, 100);
+            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
         }
 
         // This function is going to update the direction vertices using some magic, i mean math

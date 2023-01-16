@@ -2,7 +2,7 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace Lab2
+namespace Lab3
 {
     public static class Program
     {
@@ -11,7 +11,7 @@ namespace Lab2
             var nativeWindowSettings = new NativeWindowSettings()
             {
                 Size = new Vector2i(800, 600),
-                Title = "Lab2",
+                Title = "Lab3",
                 Flags = ContextFlags.ForwardCompatible,
             };
 
