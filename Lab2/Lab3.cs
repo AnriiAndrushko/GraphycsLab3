@@ -127,7 +127,9 @@ namespace Lab3
             base.OnRenderFrame(e);
 
             _time += 20 * e.Time;
-            _lightPos = new Vector3(1.2f, 1.0f, 2.0f) * Matrix3.CreateRotationY((float)MathHelper.DegreesToRadians(_time));
+            _lightPos = new Vector3(1.2f, 1.0f, 2.0f) * Matrix3.CreateRotationY((float)MathHelper.DegreesToRadians(_time))*
+                Matrix3.CreateRotationX((float)MathHelper.DegreesToRadians(_time))*
+                Matrix3.CreateRotationZ((float)MathHelper.DegreesToRadians(_time));
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -139,7 +141,7 @@ namespace Lab3
             _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
             _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-            _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.5f, 0.31f));
+            _lightingShader.SetVector3("objectColor", new Vector3(0.0f, 0.5f, 0.3f));
             _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
             _lightingShader.SetVector3("lightPos", _lightPos);
             _lightingShader.SetVector3("viewPos", _camera.Position);
