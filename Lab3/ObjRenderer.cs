@@ -1,7 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
-using JStudio.OpenGL;
 using OpenTK.Mathematics;
-using Shader = JStudio.OpenGL.Shader;
+using MyUtils;
 
 namespace Lab3
 {
@@ -20,7 +19,7 @@ namespace Lab3
         private int m_normalVBO;
         private int m_textureVBO;
 
-        private Shader m_unhighlightedShader;
+        private Shader _shader;
         private int m_triangleCount;
 
         private int rawPos;
@@ -39,14 +38,11 @@ namespace Lab3
             m_normalVBO = file.Normals.Count > 0 ? GL.GenBuffer() : -1;
             m_textureVBO = file.Material.DiffuseTexture != null ? GL.GenTexture() : -1;
 
-            m_unhighlightedShader = new Shader("UnlitTexture");
-            m_unhighlightedShader.CompileSource(File.ReadAllText("Shaders/UnlitTexture.vert"), ShaderType.VertexShader);
-            m_unhighlightedShader.CompileSource(File.ReadAllText("Shaders/UnlitTexture.frag"), ShaderType.FragmentShader);
-            m_unhighlightedShader.LinkShader();
+            _shader = new Shader("Shaders/UnlitTexture.vert", "Shaders/UnlitTexture.frag");
 
-            rawPos = m_unhighlightedShader.GetAttribLocation("RawPosition");
-            rawTex = m_unhighlightedShader.GetAttribLocation("RawTex0");
-            rawNorm = m_unhighlightedShader.GetAttribLocation("RawNormal");
+            rawPos = _shader.GetAttribLocation("RawPosition");
+            rawTex = _shader.GetAttribLocation("RawTex0");
+            rawNorm = _shader.GetAttribLocation("RawNormal");
 
             // Generate an array of all vertices instead of the compact form OBJ comes as.
             Vector3[] positions = null;
@@ -141,12 +137,16 @@ namespace Lab3
             //GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.DepthMask(true);
 
-            Shader curShader =  m_unhighlightedShader;
-            curShader.Bind();
+            _shader.Use();
 
-            GL.UniformMatrix4(curShader.UniformModelMtx, false, ref modelMatrix);
-            GL.UniformMatrix4(curShader.UniformViewMtx, false, ref viewMatrix);
-            GL.UniformMatrix4(curShader.UniformProjMtx, false, ref projMatrix);
+            _shader.SetMatrix4("model", true, modelMatrix);
+            _shader.SetMatrix4("view", true, viewMatrix);
+            _shader.SetMatrix4("projection", true, projMatrix);
+
+            _shader.SetVector3("objectColor", new Vector3(1.0f, 1.0f, 1.0f));
+            _shader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
+            _shader.SetVector3("lightPos", lightPos);
+            _shader.SetVector3("viewPos", viewPos);
 
             // Position
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_vertexVBO);

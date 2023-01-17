@@ -142,9 +142,9 @@ namespace Lab3
 
             _lightingShader.Use();
 
-            _lightingShader.SetMatrix4("model", Matrix4.Identity);
-            _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
-            _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            _lightingShader.SetMatrix4("model",true, Matrix4.Identity);
+            _lightingShader.SetMatrix4("view", true, _camera.GetViewMatrix());
+            _lightingShader.SetMatrix4("projection", true, _camera.GetProjectionMatrix());
 
             _lightingShader.SetVector3("objectColor", new Vector3(0.0f, 0.5f, 0.3f));
             _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
@@ -160,14 +160,16 @@ namespace Lab3
             Matrix4 lampMatrix = Matrix4.CreateScale(0.2f);
             lampMatrix = lampMatrix * Matrix4.CreateTranslation(_lightPos);
 
-            _lampShader.SetMatrix4("model", lampMatrix);
-            _lampShader.SetMatrix4("view", _camera.GetViewMatrix());
-            _lampShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            _lampShader.SetMatrix4("model", true, lampMatrix);
+            _lampShader.SetMatrix4("view", true, _camera.GetViewMatrix());
+            _lampShader.SetMatrix4("projection", true, _camera.GetProjectionMatrix());
 
             GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
 
-            Vector3 _catPos = new Vector3(3f, -2f, 2f);
-            Matrix4 _catMatrix = Matrix4.CreateRotationY(MathHelper.RadiansToDegrees(180)) * Matrix4.CreateTranslation(_catPos);
+            Vector3 _catPos = new Vector3(1f, -2, 1);
+            Matrix4 _catMatrix = Matrix4.CreateRotationY(MathHelper.RadiansToDegrees(180))*
+                                Matrix4.CreateTranslation(_catPos)*
+                                Matrix4.CreateRotationY((float)MathHelper.RadiansToDegrees(_time/1500));
             catRenderer.Render(_camera.GetViewMatrix(), _camera.GetProjectionMatrix(), _catMatrix, _lightPos, _camera.Position);
 
             SwapBuffers();

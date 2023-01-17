@@ -73,22 +73,10 @@ namespace Lab3
         public class ObjMaterial
         {
             public string Name { get; protected set; }
-            public WLinearColor AmbientColor { get; set; }
-            public WLinearColor DiffuseColor { get; set; }
-            public WLinearColor SpecularColor { get; set; }
-
-            public Bitmap AmbientTexture { get; set; }
             public Bitmap DiffuseTexture { get; set; }
-            public Bitmap SpecularColorTexture { get; set; }
-            public Bitmap SpecularHighlightTexture { get; set; }
-            public Bitmap AlphaTexture { get; set; }
-            public Bitmap BumpTexture { get; set; }
-
             public ObjMaterial(string name)
             {
                 Name = name;
-                AmbientColor = DiffuseColor = WLinearColor.White;
-                SpecularColor = WLinearColor.Black;
             }
         }
 
