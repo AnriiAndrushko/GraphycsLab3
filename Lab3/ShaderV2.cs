@@ -1,32 +1,9 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System;
+using System.Reflection.Metadata;
 
 namespace JStudio.OpenGL
 {
-    public enum ShaderAttributeIds
-    {
-        None = 0,
-        Position = 1,
-        Normal = 2,
-        Binormal = 3,
-        Color0 = 4,
-        Color1 = 5,
-        Tex0 = 6,
-        Tex1 = 7,
-        Tex2 = 8,
-        Tex3 = 9,
-        Tex4 = 10,
-        Tex5 = 11,
-        Tex6 = 12,
-        Tex7 = 13,
-        PosMtxIndex = 14,
-    }
-
-    public enum ShaderUniformBlockIds
-    {
-        LightBlock = 0,
-        PixelShaderBlock = 1,
-    }
 
     public class Shader
     {
@@ -34,23 +11,10 @@ namespace JStudio.OpenGL
         public int UniformModelMtx { get; private set; }
         public int UniformViewMtx { get; private set; }
         public int UniformProjMtx { get; private set; }
-        public int UniformTexMtx { get; private set; }
-        public int UniformPostTexMtx { get; private set; }
-        public int UniformColor0Amb { get; private set; }
-        public int UniformColor0Mat { get; private set; }
-        public int UniformColor1Amb { get; private set; }
-        public int UniformColor1Mat { get; private set; }
-        public int UniformLightBlock { get; private set; }
-        public int UniformPSBlock { get; private set; }
-        public int[] UniformTextureSamplers { get; private set; }
-
-        public int Program { get { return m_programAddress; } }
-        public int PSBlockUBO { get { return m_psBlockAddress; } }
 
         private int m_vertexAddress = -1;
         private int m_fragmentAddress = -1;
         private int m_programAddress = -1;
-        private int m_psBlockAddress;
 
         public Shader(string name)
         {
@@ -119,49 +83,14 @@ namespace JStudio.OpenGL
             GL.AttachShader(m_programAddress, m_vertexAddress);
             GL.AttachShader(m_programAddress, m_fragmentAddress);
 
-            // Bind our Attribute locations before we link the program.
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Position, "RawPosition");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Normal, "RawNormal");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Binormal, "RawBinormal");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Color0, "RawColor0");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Color1, "RawColor1");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex0, "RawTex0");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex1, "RawTex1");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex2, "RawTex2");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex3, "RawTex3");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex4, "RawTex4");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex5, "RawTex5");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex6, "RawTex6");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.Tex7, "RawTex7");
-            GL.BindAttribLocation(m_programAddress, (int)ShaderAttributeIds.PosMtxIndex, "RawPosMtxIndex");
-
             GL.LinkProgram(m_programAddress);
 
-            int linkStatus;
-            GL.GetProgram(m_programAddress, GetProgramParameterName.LinkStatus, out linkStatus);
-            if (linkStatus != 1)
-            {
-                Console.WriteLine("Error linking shader. Result: {0}", GL.GetProgramInfoLog(m_programAddress));
-                return false;
-            }
 
             // Now that the program is linked, bind to our uniform locations.
-            UniformModelMtx = GL.GetUniformLocation(m_programAddress, "ModelMtx");
-            UniformViewMtx = GL.GetUniformLocation(m_programAddress, "ViewMtx");
-            UniformProjMtx = GL.GetUniformLocation(m_programAddress, "ProjMtx");
+            UniformModelMtx = GL.GetUniformLocation(m_programAddress, "model");
+            UniformViewMtx = GL.GetUniformLocation(m_programAddress, "view");
+            UniformProjMtx = GL.GetUniformLocation(m_programAddress, "projection");
 
-            UniformTexMtx = GL.GetUniformLocation(m_programAddress, "TexMtx");
-            UniformPostTexMtx = GL.GetUniformLocation(m_programAddress, "PostMtx");
-            UniformColor0Amb = GL.GetUniformLocation(m_programAddress, "COLOR0_Amb");
-            UniformColor0Mat = GL.GetUniformLocation(m_programAddress, "COLOR0_Mat");
-            UniformColor1Amb = GL.GetUniformLocation(m_programAddress, "COLOR1_Amb");
-            UniformColor1Mat = GL.GetUniformLocation(m_programAddress, "COLOR1_Mat");
-            UniformLightBlock = GL.GetUniformBlockIndex(m_programAddress, "LightBlock");
-            UniformPSBlock = GL.GetUniformBlockIndex(m_programAddress, "PSBlock");
-
-            UniformTextureSamplers = new int[8];
-            for (int i = 0; i < UniformTextureSamplers.Length; i++)
-                UniformTextureSamplers[i] = GL.GetUniformLocation(m_programAddress, string.Format("Texture[{0}]", i));
 
             // Now that we've (presumably) set both a vertex and a fragment shader and linked them to the program,
             // we're going to clean up the reference to the shaders as the Program now keeps its own reference.
@@ -169,14 +98,13 @@ namespace JStudio.OpenGL
             GL.DeleteShader(m_fragmentAddress);
             m_vertexAddress = -1;
             m_fragmentAddress = -1;
-
-            m_psBlockAddress = GL.GenBuffer();
             return true;
         }
 
-        public override string ToString()
+
+        public int GetAttribLocation(string attribName)
         {
-            return Name;
+            return GL.GetAttribLocation(m_programAddress, attribName);
         }
 
         ~Shader()
@@ -185,9 +113,6 @@ namespace JStudio.OpenGL
                 GL.DeleteShader(m_vertexAddress);
             if (m_fragmentAddress >= 0)
                 GL.DeleteShader(m_fragmentAddress);
-
-            if (m_psBlockAddress >= 0)
-                GL.DeleteBuffer(m_psBlockAddress);
 
             if (m_programAddress >= -1)
                 GL.DeleteProgram(m_programAddress);

@@ -23,6 +23,10 @@ namespace Lab3
         private Shader m_unhighlightedShader;
         private int m_triangleCount;
 
+        private int rawPos;
+        private int rawTex;
+        private int rawNorm;
+
         // To detect redundant calls
         private bool m_hasBeenDisposed = false;
 
@@ -39,6 +43,10 @@ namespace Lab3
             m_unhighlightedShader.CompileSource(File.ReadAllText("Shaders/UnlitTexture.vert"), ShaderType.VertexShader);
             m_unhighlightedShader.CompileSource(File.ReadAllText("Shaders/UnlitTexture.frag"), ShaderType.FragmentShader);
             m_unhighlightedShader.LinkShader();
+
+            rawPos = m_unhighlightedShader.GetAttribLocation("RawPosition");
+            rawTex = m_unhighlightedShader.GetAttribLocation("RawTex0");
+            rawNorm = m_unhighlightedShader.GetAttribLocation("RawNormal");
 
             // Generate an array of all vertices instead of the compact form OBJ comes as.
             Vector3[] positions = null;
@@ -142,23 +150,23 @@ namespace Lab3
 
             // Position
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_vertexVBO);
-            GL.EnableVertexAttribArray((int)ShaderAttributeIds.Position);
-            GL.VertexAttribPointer((int)ShaderAttributeIds.Position, 3, VertexAttribPointerType.Float, false, 12, 0);
+            GL.EnableVertexAttribArray(rawPos);
+            GL.VertexAttribPointer(rawPos, 3, VertexAttribPointerType.Float, false, 12, 0);
 
             // Texcoord
             if (m_texcoordVBO >= 0)
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, m_texcoordVBO);
-                GL.EnableVertexAttribArray((int)ShaderAttributeIds.Tex0);
-                GL.VertexAttribPointer((int)ShaderAttributeIds.Tex0, 2, VertexAttribPointerType.Float, false, 8, 0);
+                GL.EnableVertexAttribArray(rawTex);
+                GL.VertexAttribPointer(rawTex, 2, VertexAttribPointerType.Float, false, 8, 0);
             }
 
             // Normals
             if (m_normalVBO >= 0)
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, m_normalVBO);
-                GL.EnableVertexAttribArray((int)ShaderAttributeIds.Normal);
-                GL.VertexAttribPointer((int)ShaderAttributeIds.Normal, 3, VertexAttribPointerType.Float, true, 12, 0);
+                GL.EnableVertexAttribArray(rawNorm);
+                GL.VertexAttribPointer(rawNorm, 3, VertexAttribPointerType.Float, true, 12, 0);
             }
 
             // Texture
@@ -179,9 +187,9 @@ namespace Lab3
             GL.Disable(EnableCap.Blend);
             //GL.Disable(EnableCap.DepthTest);
 
-            GL.DisableVertexAttribArray((int)ShaderAttributeIds.Position);
-            GL.DisableVertexAttribArray((int)ShaderAttributeIds.Tex0);
-            GL.DisableVertexAttribArray((int)ShaderAttributeIds.Normal);
+            GL.DisableVertexAttribArray(rawPos);
+            GL.DisableVertexAttribArray(rawTex);
+            GL.DisableVertexAttribArray(rawNorm);
             GL.BindTexture(TextureTarget.Texture2D, -1);
         }
 
