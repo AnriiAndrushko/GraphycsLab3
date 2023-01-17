@@ -55,8 +55,6 @@ namespace Lab3
             -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         };
 
-        private Vector3 _lightPos;
-
         private int _vertexBufferObject;
 
         private int _vaoModel;
@@ -75,6 +73,9 @@ namespace Lab3
 
         private double _time;
 
+        Obj cat = new Obj();
+        SimpleObjRenderer catRenderer;
+
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
@@ -83,6 +84,9 @@ namespace Lab3
         protected override void OnLoad()
         {
             base.OnLoad();
+
+            cat.Load("Model\\untitled.obj");
+            catRenderer = new SimpleObjRenderer(cat);
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -127,7 +131,8 @@ namespace Lab3
             base.OnRenderFrame(e);
 
             _time += 20 * e.Time;
-            _lightPos = new Vector3(1.2f, 1.0f, 2.0f) * Matrix3.CreateRotationY((float)MathHelper.DegreesToRadians(_time))*
+
+            Vector3 _lightPos = new Vector3(1.2f, 1.0f, 2.0f) * Matrix3.CreateRotationY((float)MathHelper.DegreesToRadians(_time))*
                 Matrix3.CreateRotationX((float)MathHelper.DegreesToRadians(_time))*
                 Matrix3.CreateRotationZ((float)MathHelper.DegreesToRadians(_time));
 
@@ -160,6 +165,10 @@ namespace Lab3
             _lampShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
             GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+
+            Vector3 _catPos = new Vector3(3f, -2f, 2f);
+            Matrix4 _catMatrix = Matrix4.CreateRotationY(MathHelper.RadiansToDegrees(180)) * Matrix4.CreateTranslation(_catPos);
+            catRenderer.Render(_camera.GetViewMatrix(), _camera.GetProjectionMatrix(), _catMatrix, _lightPos, _camera.Position);
 
             SwapBuffers();
         }
